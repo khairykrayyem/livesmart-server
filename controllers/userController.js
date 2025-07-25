@@ -1,16 +1,31 @@
 const User = require('../models/userModel');
+const jwt = require('jsonwebtoken');
 
-//// login smarthome app
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id, username: user.username, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+};
+
 const login = async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ username });
 
   if (user && await user.matchPassword(password)) {
-    res.json({ _id: user._id, username: user.username, role: user.role });
+    const token = generateToken(user);
+    res.json({
+      _id: user._id,
+      username: user.username,
+      role: user.role,
+      token
+    });
   } else {
     res.status(401).json({ message: 'Invalid credentials' });
   }
 };
+
 
 /// הוספת משתמש – רק אם היוזר הנוכחי הוא admin
 const register = async (req, res) => {
