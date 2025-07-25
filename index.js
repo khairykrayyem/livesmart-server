@@ -19,8 +19,13 @@ app.use(express.json()); // מאפשר קבלת JSON בבקשות POST
 const deviceRoutes = require('./routes/deviceRoutes');
 app.use('/api/devices', deviceRoutes);
 
+//חדרים 
 const roomRoutes = require('./routes/roomRoutes');
 app.use('/api/rooms', roomRoutes);
+
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/users', userRoutes);
+
 
 
 // ברירת מחדל
