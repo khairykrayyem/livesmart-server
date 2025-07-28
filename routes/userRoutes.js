@@ -1,11 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { login, register, deleteUser } = require('../controllers/userController');
-const { protect, adminOnly } = require('../middleware/authMiddleware');
 
+const { login, register, getAllUsers , deleteUser } = require('../controllers/userController');
+const { verifyToken, requireAdmin } = require('../middleware/authMiddleware');
+
+// התחברות - פתוח לכולם
 router.post('/login', login);
-router.post('/register', protect, adminOnly, register); // admin only/הגדרתי ש רק ADMIIN יכול לעדכן 
-router.delete('/:id', protect, adminOnly, deleteUser);  // admin only/ רק ADMIN יכול למחוק משתמש בבית
+
+router.get('/', verifyToken, requireAdmin, getAllUsers); 
+
+
+// יצירת משתמש - רק ע"י ADMIN
+router.post('/register', verifyToken, requireAdmin ,register);
+
+// מחיקת משתמש - רק ע"י ADMIN
+router.delete('/:id', verifyToken, requireAdmin, deleteUser);
 
 module.exports = router;
-

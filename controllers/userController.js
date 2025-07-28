@@ -9,6 +9,7 @@ const generateToken = (user) => {
   );
 };
 
+// התחברות
 const login = async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ username });
@@ -26,14 +27,9 @@ const login = async (req, res) => {
   }
 };
 
-
-/// הוספת משתמש – רק אם היוזר הנוכחי הוא admin
+// יצירת משתמש חדש – רק ע"י ADMIN
 const register = async (req, res) => {
-  const { username, password, role, currentUserRole } = req.body;
-
-  if (currentUserRole !== 'admin') {
-    return res.status(403).json({ message: 'Access denied' });
-  }
+  const { username, password, role } = req.body;
 
   const exists = await User.findOne({ username });
   if (exists) return res.status(400).json({ message: 'User already exists' });
@@ -43,10 +39,20 @@ const register = async (req, res) => {
   res.status(201).json({ message: 'User created successfully' });
 };
 
-// מחיקת משתמש – רק admin
+// שליפת כל המשתמשים – רק ל-ADMIN
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password'); // אל תחזיר סיסמאות
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+// מחיקת משתמש – רק ע"י ADMIN
 const deleteUser = async (req, res) => {
-  const { currentUserRole } = req.body;
-  if (currentUserRole !== 'admin') {
+  if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Access denied' });
   }
 
@@ -58,4 +64,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { login, register, deleteUser };
+module.exports = { login, register, getAllUsers , deleteUser };

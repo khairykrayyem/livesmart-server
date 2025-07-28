@@ -1,25 +1,30 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
-const protect = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+// בדיקה אם המשתמש מחובר
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
 
-  if (!token) return res.status(401).json({ message: 'No token provided' });
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
-  } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
+  } catch (err) {
+    res.status(403).json({ message: 'Invalid token' });
   }
 };
 
-const adminOnly = (req, res, next) => {
-  if (req.user?.role !== 'admin') {
-    return res.status(403).json({ message: 'Admin only' });
+// בדיקה אם המשתמש הוא admin
+const requireAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied' });
   }
   next();
 };
 
-module.exports = { protect, adminOnly };
+module.exports = { verifyToken, requireAdmin };
