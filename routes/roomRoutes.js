@@ -19,3 +19,4 @@ router.put('/:id', verifyToken, updateRoom);
 router.delete('/:id', verifyToken, deleteRoom);
 
 module.exports = router;
+ 

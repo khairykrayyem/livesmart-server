@@ -16,4 +16,4 @@ router.post('/register', verifyToken, requireAdmin ,register);
 // מחיקת משתמש - רק ע"י ADMIN
 router.delete('/:id', verifyToken, requireAdmin, deleteUser);
 
-module.exports = router;
+module.exports = router; 
