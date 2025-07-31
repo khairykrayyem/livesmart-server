@@ -18,7 +18,7 @@ router.get('/', verifyToken, getDevices);
 router.get('/room/:roomId', verifyToken, getDevicesByRoom);
 
 // יצירת מכשיר – רק ADMIN
-router.post('/', verifyToken, requireAdmin, createDevice);
+router.post('/', verifyToken /*, requireAdmin*/, createDevice);
 
 // עדכון מכשיר – רק ADMIN
 router.put('/:id', verifyToken, requireAdmin, updateDevice);

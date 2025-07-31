@@ -26,6 +26,9 @@ app.use('/api/rooms', roomRoutes);
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
+const deviceRequestRoutes = require('./routes/deviceRequestRoutes');
+app.use('/api/device-requests', deviceRequestRoutes); 
+
 app.get('/health', async (req, res) => {
   const startedAt = Date.now();
 
