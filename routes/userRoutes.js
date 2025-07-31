@@ -7,7 +7,7 @@ const { verifyToken, requireAdmin } = require('../middleware/authMiddleware');
 // התחברות - פתוח לכולם
 router.post('/login', login);
 
-router.get('/', verifyToken, requireAdmin, getAllUsers); 
+router.get('/', verifyToken, getAllUsers); 
 
 
 // יצירת משתמש - רק ע"י ADMIN

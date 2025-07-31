@@ -11,9 +11,48 @@ connectDB();
 
 const app = express();
 
-// Middleware
+// Middleware 
 app.use(cors());
 app.use(express.json()); // מאפשר קבלת JSON בבקשות POST
+
+////////////////////////////////////////////////////////////////////////////////////
+// === Weather API (חיצוני: Open-Meteo) ===
+app.get('/api/weather', async (req, res) => {                               
+  try {
+    let { city, lat, lon } = req.query;                                     
+
+    if (!lat || !lon) {                                                      // אם לא נתנו קואורדינטות
+      if (!city) return res.status(400).json({ message: 'Provide ?city= or ?lat=&lon=' }); // דרוש עיר או lat/lon
+      const gRes = await fetch(                                              // קריאת Geocoding לחיפוש עיר
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
+      );
+      const gData = await gRes.json();                                       // JSON של תוצאת הגיאוקודינג
+      if (!gData.results?.length) return res.status(404).json({ message: 'City not found' }); // לא נמצאה עיר
+      lat = gData.results[0].latitude;                                       
+      lon = gData.results[0].longitude;                                      
+      city = gData.results[0].name;                                      
+    }
+
+    const wRes = await fetch(                                                // קריאת מזג אוויר לפי lat/lon
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`
+    );
+    if (!wRes.ok) return res.status(502).json({ message: 'Weather provider error' }); // שגיאת ספק חיצוני
+    const w = await wRes.json();                                             // JSON של מזג האוויר
+
+    return res.json({                                                         // תשובה פשוטה ללקוח
+      city: city || undefined,                                               // שם העיר אם ניתן
+      lat: Number(lat),                                                      // לט נומרי
+      lon: Number(lon),                                                      // לון נומרי
+      temperature: w.current_weather?.temperature,                           // הטמפרטורה כרגע
+      unit: '°C',                                                            // יחידות (Open-Meteo מחזיר ב-°C)
+      wind: w.current_weather?.windspeed                                     // מהירות רוח (אופציונלי)
+    });
+  } catch (err) {                                                             // תפיסת שגיאה כללית
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////////////////////
 
 // ראוטים
 const deviceRoutes = require('./routes/deviceRoutes');
